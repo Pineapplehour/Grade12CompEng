@@ -1,3 +1,4 @@
+/*
 int Q = 2;
 int QBAR = 3;
 int PUSH_BUTTON = 5;
@@ -19,3 +20,4 @@ void loop() {
   digitalWrite(Q, HIGH);
   digitalWrite(QBAR, HIGH);
 }
+*/

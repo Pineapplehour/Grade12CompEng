@@ -1,9 +1,19 @@
-int DS_PIN = 2;
-int LATCH_PIN = 3;
-int CLOCK_PIN = 4;
+int DS_PIN = 13;
+int LATCH_PIN = 12;
+int CLOCK_PIN = 011;
 int BAUD_RATE = 9600;
-int delayLength = 250; 
-int patternArray[]= {1,2,4,8,16,32,64,128};
+int DELAY_LENGTH = 100; 
+int patternArray[9][8] = {
+  {0,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,0,0},
+  {0,1,0,0,0,0,0,0},
+  {0,0,1,0,0,0,0,0},
+  {0,0,0,1,0,0,0,0},
+  {0,0,0,0,1,0,0,0},
+  {0,0,0,0,0,1,0,0},
+  {0,0,0,0,0,0,1,0},
+  {0,0,0,0,0,0,0,1}
+};
 void setup() {
   Serial.begin(BAUD_RATE);
   pinMode(DS_PIN, OUTPUT);
@@ -12,10 +22,12 @@ void setup() {
 }
 
 void loop() {
-  for(int r = 0; r < sizeof(patternArray)/sizeof(int); r++){
-  shiftOut(DS_PIN, CLOCK_PIN, MSBFIRST, patternArray[r]);
-  pulsePin(LATCH_PIN, delayLength);
-  Serial.println(patternArray[r]);
+  for(int r = 0; r < 9; r++){
+    for(int c = 0; c < 8; c++){
+      digitalWrite(DS_PIN, patternArray[r][c]);
+      pulsePin(CLOCK_PIN, DELAY_LENGTH);
+    }
+    pulsePin(LATCH_PIN, DELAY_LENGTH);
   }
 }
 

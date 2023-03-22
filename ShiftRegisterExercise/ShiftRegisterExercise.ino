@@ -1,10 +1,9 @@
-int DS_PIN = 13;
-int LATCH_PIN = 12;
-int CLOCK_PIN = 011;
+int DS_PIN = 2;
+int LATCH_PIN = 3;
+int CLOCK_PIN = 4;
 int BAUD_RATE = 9600;
-int DELAY_LENGTH = 100; 
-int patternArray[9][8] = {
-  {0,0,0,0,0,0,0,0},
+int DELAY_LENGTH = 50; 
+int patternArray[8][8] = {
   {1,0,0,0,0,0,0,0},
   {0,1,0,0,0,0,0,0},
   {0,0,1,0,0,0,0,0},
@@ -22,7 +21,7 @@ void setup() {
 }
 
 void loop() {
-  for(int r = 0; r < 9; r++){
+  for(int r = 0; r < 8; r++){
     for(int c = 0; c < 8; c++){
       digitalWrite(DS_PIN, patternArray[r][c]);
       pulsePin(CLOCK_PIN, DELAY_LENGTH);

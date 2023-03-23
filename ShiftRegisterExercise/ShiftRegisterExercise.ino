@@ -33,8 +33,14 @@ void setup() {
 }
 
 void loop() {
-  runLightForwards();
-  runLightBackwards();
+  for(int i = 1; i <= 8; i++){
+    lightOneLed(i);
+    clearShiftRegister(i);
+  }
+  for(int i = 7; i >= 1; i--){
+    lightOneLed(i);
+    clearShiftRegister(i);
+  }
 }
 
 
@@ -61,35 +67,39 @@ void displayPatternArray(){
   }
 }
 
-void runLightForwards() {
-//moves lit LED forwards
+void lightOneLed(int led){
+//Lights one led. Use in conjuction with clearRegister()
+//Parameter: Position of LED, 1 being the first Flip Flop
   digitalWrite(DS_PIN, HIGH);
   pulsePin(CLOCK_PIN, DELAY_LENGTH);
+  Serial.print(1);
   digitalWrite(DS_PIN, LOW);
-  pulsePin(LATCH_PIN, DELAY_LENGTH);
-  for(int i = 1; i <= 8; i++){
-    pulsePin(LATCH_PIN, DELAY_LENGTH);
+  for(int i = 1; i < led; i++){
     pulsePin(CLOCK_PIN, DELAY_LENGTH);
+    Serial.print(0);
+  }
+  pulsePin(LATCH_PIN, DELAY_LENGTH);
+  Serial.println(" LATCHED");
+}
+
+void clearShiftRegister(int lastLit){
+//pushes all data off shift register, DOES NOT CLEAR LEDS
+//Parameter: Position of latest loaded flip flop, 1 being the first Flip Flop
+  for(int i = lastLit; i <= 8; i++){
+    pulsePin(CLOCK_PIN, DELAY_LENGTH);
+    Serial.print(0);
   }
 }
 
-void runLightBackwards(){
-//moves lit LED backwards
-  for(int i = 7; i >= 0; i--){
-    digitalWrite(DS_PIN, HIGH);
+void clearShiftRegister(){
+//pushes all data off shift register, DOES NOT CLEAR LEDS
+//Parameter: none
+  for(int i = 1; i <= 8; i++){
     pulsePin(CLOCK_PIN, DELAY_LENGTH);
-    digitalWrite(DS_PIN, LOW);
-    Serial.print(1);
-    for (int j = i; j > 0; j--){
-      pulsePin(CLOCK_PIN, DELAY_LENGTH);
-      Serial.print(0);
-    }
-    pulsePin(LATCH_PIN, DELAY_LENGTH);
-    Serial.println(" LATCHED");
-    for (int p = 7-i; p > 0; p--){
-      pulsePin(CLOCK_PIN, DELAY_LENGTH);
-      Serial.print(0);
-    }
+    Serial.print(0);
   }
 }
+
+
+
   

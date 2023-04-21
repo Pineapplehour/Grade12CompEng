@@ -1,16 +1,18 @@
 /*
 Mesurement Tool 
+Summary: Runs ultrasonic sensor tool 
 By: Ethan Lai
 V: April 13th
 */
-
 #include <LiquidCrystal.h>
 #include <Keypad.h>
 #define powerPin 41
 #define trigPin 39
 #define echoPin 37
 #define groundPin 35
+//LCD 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+//keypad 
 const byte ROWS = 4;                   
 const byte COLS = 4;                   
 char key;                              
@@ -23,8 +25,11 @@ char keys[ROWS][COLS] = {
 byte rowPins[ROWS] = {14, 15, 16, 17}; // connect to the row pinouts of the keypad
 byte colPins[COLS] = {18, 19, 20, 21}; // connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
+//other
 int mode = 0; 
 int referenceIndex= 0;
+const int CM_CONSTANT = 58;
+const int INCH_CONSTANT = 148;
 String temporaryReference = "";
 long temporaryReferenceInMs = 0;
 long lastDistanceInMs = 0;
@@ -47,35 +52,37 @@ void setup() {
 void loop() {
   updateMode();
   updateUnits();
-  /*
-  mode name | mode value
-  measure   | 0
-  hold      | 1
-  reference | 2
-  */
-  if(mode == 0){ 
+  if(mode == 0){ //mesure mode 
     measure();
+    delay(250);
   }
-  else if(mode == 1){
+  else if(mode == 1){ //hold mode
     hold();
+    delay(250);
   }
-  else if(mode == 2){
+  else if(mode == 2){ //reference mode
     referenceMode();
+    delay(100);
   }
+  
   Serial.println();
-  delay(250);
 }
 
 long distanceInMs(){
-  //returns a weighted average of the distance and last distance measured, in Ms. 
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  lastDistanceInMs = (pulseIn(echoPin, HIGH)*3 + lastDistanceInMs*2)/5;
-  if(lastDistanceInMs/58 > 400){
+  //returns a weighted average of the distance and last distance measured, in milliseconds
+  lastDistanceInMs = 0;
+  for(int i = 0; i < 10; i++){
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    lastDistanceInMs = lastDistanceInMs + pulseIn(echoPin, HIGH);
+    delay(1);
+  }
+  lastDistanceInMs = lastDistanceInMs/10;
+  if(lastDistanceInMs/CM_CONSTANT > 400){
     return(-1);
   }
-  else if (lastDistanceInMs/58 < 2) {
+  else if (lastDistanceInMs/CM_CONSTANT < 2) {
     return(-2);
   }
   else{}
@@ -83,6 +90,7 @@ long distanceInMs(){
 }
 
 int readKeys(){ 
+  //returns which lcd key has been pressed
   int ADCvalue = analogRead(0);        
   if (ADCvalue > 1000) return 5;       
   else if (ADCvalue < 50)   return 0;  //right
@@ -108,6 +116,7 @@ void updateMode(){
 }
 
 void updateUnits(){
+  //when select key is pressed, the units cycle
   if(readKeys() == 4){
     useCM = !useCM;
     while(readKeys() == 4){}
@@ -117,6 +126,7 @@ void updateUnits(){
 }
 
 void measure(){
+  //meaure mode 
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("MEASURE");
@@ -130,11 +140,11 @@ void measure(){
   }
   else{
     if(useCM == true){
-      lcd.print(tempMeasurement/58);
+      lcd.print(tempMeasurement/CM_CONSTANT);
       lcd.print("cm");
     }
     else if(useCM == false){
-      lcd.print(tempMeasurement/148);
+      lcd.print(tempMeasurement/INCH_CONSTANT );
       lcd.print("\"");    
     }
     matchFound = false; 
@@ -153,26 +163,29 @@ void measure(){
 }
 
 void hold(){
-  lcd.clear();
+  //hold mode
   long held = distanceInMs();
   while(readKeys() != 1){
     updateUnits();
+    lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("HELD");
     lcd.setCursor(0,1);
     if(useCM == true){
-      lcd.print(held/58);
+      lcd.print(held/CM_CONSTANT);
       lcd.print("cm");
     }
     else if(useCM == false){
-      lcd.print(held/148);
+      lcd.print(held/INCH_CONSTANT );
       lcd.print("\"");
     }
+    Serial.println();
   }
-  
+  updateMode();
 }
 
 void updateRef(){
+  //cycles through references using left and right lcd keys 
   if(readKeys() == 0 && referenceIndex != 4){
     referenceIndex++;
     while(readKeys() == 0){}
@@ -194,6 +207,7 @@ void updateRef(){
 }
 
 void referenceMode(){
+  //reference mode
   updateRef();
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -204,10 +218,10 @@ void referenceMode(){
   if (key){
     temporaryReference = temporaryReference + key;
     if(useCM == true){
-      temporaryReferenceInMs = temporaryReference.toInt()*58;
+      temporaryReferenceInMs = temporaryReference.toInt()*CM_CONSTANT;
     }
     else if(useCM == false){
-      temporaryReferenceInMs = temporaryReference.toInt()*148;
+      temporaryReferenceInMs = temporaryReference.toInt()*INCH_CONSTANT ;
     }
     refSet = false;
   }
@@ -217,11 +231,11 @@ void referenceMode(){
   if(refSet == true){
     lcd.setCursor(0, 1);
     if(useCM == true){
-      lcd.print(referenceArray[referenceIndex]/58);
+      lcd.print(referenceArray[referenceIndex]/CM_CONSTANT);
       lcd.print("cm");
     }
     else if(useCM == false){
-      lcd.print(referenceArray[referenceIndex]/148);
+      lcd.print(referenceArray[referenceIndex]/INCH_CONSTANT );
       lcd.print("\"");
     }
   }
@@ -229,11 +243,11 @@ void referenceMode(){
   if(refSet == false){
     lcd.setCursor(0, 1);
     if(useCM == true){
-      lcd.print(temporaryReferenceInMs/58);
+      lcd.print(temporaryReferenceInMs/CM_CONSTANT);
       lcd.print("cm");
     }
     else if(useCM == false){
-      lcd.print(temporaryReferenceInMs/148);
+      lcd.print(temporaryReferenceInMs/INCH_CONSTANT );
       lcd.print("\"");
     }
   }
@@ -250,10 +264,16 @@ void referenceMode(){
       delay(500);
     }
     else if(useCM == true){
-      referenceArray[referenceIndex] = temporaryReference.toInt()*58; 
+      referenceArray[referenceIndex] = temporaryReference.toInt()*CM_CONSTANT; 
+      lcd.setCursor(0, 1);
+      lcd.print("Saved");
+      delay(500);
     }
     else if(useCM == false){
-      referenceArray[referenceIndex] = temporaryReference.toInt()*148; 
+      referenceArray[referenceIndex] = temporaryReference.toInt()*INCH_CONSTANT ; 
+      lcd.setCursor(0, 1);
+      lcd.print("Saved");
+      delay(500);
     }
     while(readKeys() == 2){}
     refSet = true;

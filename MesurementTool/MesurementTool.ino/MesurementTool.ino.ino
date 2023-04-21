@@ -48,7 +48,7 @@ void setup() {
  digitalWrite(groundPin, LOW);
  lcd.begin(16,2);
 }
-
+//--------------------------------------------------
 void loop() {
   updateMode();
   updateUnits();
@@ -67,7 +67,7 @@ void loop() {
   
   Serial.println();
 }
-
+//--------------------------------------------------
 long distanceInMs(){
   //returns a weighted average of the distance and last distance measured, in milliseconds
   lastDistanceInMs = 0;
@@ -88,7 +88,7 @@ long distanceInMs(){
   else{}
   return (lastDistanceInMs);
 }
-
+//--------------------------------------------------
 int readKeys(){ 
   //returns which lcd key has been pressed
   int ADCvalue = analogRead(0);        
@@ -100,7 +100,7 @@ int readKeys(){
   else if (ADCvalue < 790)  return 4;  //select
   else return 5;                        
 }
-
+//--------------------------------------------------
 void updateMode(){
   //when up key is pressed, the mode cycles. 
   if(readKeys() == 1 && mode != 2){
@@ -114,7 +114,7 @@ void updateMode(){
   Serial.print(" Mode: ");
   Serial.print(mode);
 }
-
+//--------------------------------------------------
 void updateUnits(){
   //when select key is pressed, the units cycle
   if(readKeys() == 4){
@@ -124,7 +124,7 @@ void updateUnits(){
   Serial.print(" Using CM: ");
   Serial.print(useCM);
 }
-
+//--------------------------------------------------
 void measure(){
   //meaure mode 
   lcd.clear();
@@ -157,11 +157,10 @@ void measure(){
       }
     }
   }
-  
   Serial.print(" Measured: ");
   Serial.print(tempMeasurement);
 }
-
+//--------------------------------------------------
 void hold(){
   //hold mode
   long held = distanceInMs();
@@ -183,7 +182,7 @@ void hold(){
   }
   updateMode();
 }
-
+//--------------------------------------------------
 void updateRef(){
   //cycles through references using left and right lcd keys 
   if(readKeys() == 0 && referenceIndex != 4){
@@ -205,7 +204,7 @@ void updateRef(){
   Serial.print(" Reference Index: ");
   Serial.print(referenceIndex);
 }
-
+//--------------------------------------------------
 void referenceMode(){
   //reference mode
   updateRef();
@@ -213,7 +212,6 @@ void referenceMode(){
   lcd.setCursor(0, 0);
   lcd.print("REFERENCE: ");
   lcd.print(referenceIndex + 1);
-
   char key = keypad.getKey();
   if (key){
     temporaryReference = temporaryReference + key;
@@ -225,9 +223,6 @@ void referenceMode(){
     }
     refSet = false;
   }
-  
-  
-
   if(refSet == true){
     lcd.setCursor(0, 1);
     if(useCM == true){
@@ -239,7 +234,6 @@ void referenceMode(){
       lcd.print("\"");
     }
   }
-
   if(refSet == false){
     lcd.setCursor(0, 1);
     if(useCM == true){
@@ -251,7 +245,6 @@ void referenceMode(){
       lcd.print("\"");
     }
   }
-
   if(readKeys() == 2){
     if(temporaryReference.toInt() > 400 && useCM == true){
       lcd.setCursor(0, 1);

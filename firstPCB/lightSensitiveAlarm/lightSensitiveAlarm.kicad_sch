@@ -536,6 +536,15 @@
     (uuid f38ca153-73d9-4bba-acd1-d83d6b13c6cc)
   )
 
+  (label "Ground" (at 135.89 102.87 0) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 0942a03d-d296-417d-87ad-8b687130d667)
+  )
+  (label "VCC" (at 132.08 88.9 0) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid c07a07a1-e7bc-4f98-b46b-e27aecfb8532)
+  )
+
   (symbol (lib_id "Device:Battery") (at 132.08 95.25 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1072f969-90ff-4ea3-baf0-e0675ef10916)
